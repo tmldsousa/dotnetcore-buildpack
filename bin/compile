@@ -38,8 +38,15 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
 cd $BUILD_DIR
 dotnet --info
 
-PROJECT_NAME=$(basename $(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)))
-PROJECT_FILE=$(find ${BUILD_DIR} -maxdepth 5 -iname "${PROJECT_NAME}.csproj" | head -1)
+if [ -n "$PROJECT" ]; then
+	PROJECT_FILE=${BUILD_DIR}/${PROJECT}
+	PROJECT_FILENAME=${PROJECT_FILE##*/}
+	PROJECT_NAME=${PROJECT_FILENAME%.[^.]*}
+	echo "Project file configured in PROJECT environment variable"
+else
+	PROJECT_NAME=$(basename $(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)))
+	PROJECT_FILE=$(find ${BUILD_DIR} -maxdepth 5 -iname "${PROJECT_NAME}.csproj" | head -1)
+fi
 
 echo "restore ${PROJECT_FILE}"
 dotnet restore $PROJECT_FILE
